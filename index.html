@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Validator Stats</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+            cursor: pointer; /* Make headers clickable for sorting */
+        }
+    </style>
+</head>
+<body>
+    <h1>Validator Stats</h1>
+    <div id="summary"></div>
+    <table id="validatorTable">
+        <thead>
+            <tr>
+                <th onclick="sortTable('balance')">Balance</th>
+                <th onclick="sortTable('withdrawal_amount')">Withdrawal Amount</th>
+                <th>Pubkey</th>
+                <th>Index</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Rows will be populated by JavaScript -->
+        </tbody>
+    </table>
+
+    <script>
+        let validatorData = []; // Store the fetched data globally
+
+        const fetchData = async () => {
+            const response = await fetch('http://localhost:3000/dill_validators');
+            const data = await response.json();
+
+            // Update the summary
+            document.getElementById('summary').innerHTML = `
+                <p>Total Balance: ${data.totalBalance}</p>
+                <p>Total Withdrawal Amount: ${data.totalWithdrawalAmount}</p>
+            `;
+
+            // Store the fetched data
+            validatorData = data.validators;
+
+            // Sort by balance (descending) and then by withdrawal amount (descending)
+            sortTable('balance');
+        };
+
+        const sortTable = (sortBy) => {
+            validatorData.sort((a, b) => {
+                if (sortBy === 'balance') {
+                    // Sort by balance (descending)
+                    if (parseFloat(a.balance) > parseFloat(b.balance)) return -1;
+                    if (parseFloat(a.balance) < parseFloat(b.balance)) return 1;
+                    // If balance is equal, sort by withdrawal amount (descending)
+                    if (parseFloat(a.withdrawal_amount) > parseFloat(b.withdrawal_amount)) return -1;
+                    if (parseFloat(a.withdrawal_amount) < parseFloat(b.withdrawal_amount)) return 1;
+                    return 0;
+                } else if (sortBy === 'withdrawal_amount') {
+                    // Sort by withdrawal amount (descending)
+                    if (parseFloat(a.withdrawal_amount) > parseFloat(b.withdrawal_amount)) return -1;
+                    if (parseFloat(a.withdrawal_amount) < parseFloat(b.withdrawal_amount)) return 1;
+                    // If withdrawal amount is equal, sort by balance (descending)
+                    if (parseFloat(a.balance) > parseFloat(b.balance)) return -1;
+                    if (parseFloat(a.balance) < parseFloat(b.balance)) return 1;
+                    return 0;
+                }
+                return 0;
+            });
+
+            // Update the table
+            const tbody = document.querySelector('#validatorTable tbody');
+            tbody.innerHTML = '';
+
+            validatorData.forEach(validator => {
+				const row = document.createElement('tr');
+
+				const balance = parseFloat(validator.balance);
+				const isIntegerLike = Math.abs(balance - Math.round(balance)) < 1e-8; // tolerance for float rounding
+
+				const balanceCell = `<td style="${isIntegerLike ? 'color:red; font-weight:bold;' : ''}">${validator.balance}</td>`;
+
+				row.innerHTML = `
+					${balanceCell}
+					<td>${validator.withdrawal_amount}</td>
+					<td>${validator.pubkey}</td>
+					<td><a href="https://alps.dill.xyz/validator/${validator.index}">${validator.index}</a></td>
+					<td>${validator.status}</td>
+				`;
+				tbody.appendChild(row);
+			});
+        };
+
+        setInterval(fetchData, 5 * 60000); // Refresh every 5 seconds
+        fetchData(); // Initial fetch
+    </script>
+</body>
+</html>
