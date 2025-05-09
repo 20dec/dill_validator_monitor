@@ -2,6 +2,8 @@
 
 A simple monitoring tool built with Node.js and a static HTML frontend to track validator status.
 
+![Validator Monitor Screenshot](Screenshot.png)
+
 ---
 
 ## 📦 Installation
