@@ -76,7 +76,7 @@ To serve the frontend from a web server (e.g., Apache or Nginx):
    /var/www/html/dill_abcxyz/index.html
    ```
 
-3. **Edit the `index.html` file (line 46)**  
+3. **Edit the `index.html` file (line 45)**  
    Replace:
    ```js
    http://localhost:3000/dill_validators
