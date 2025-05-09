@@ -9,7 +9,7 @@ A simple monitoring tool built with Node.js and a static HTML frontend to track 
 Install the required Node.js dependencies:
 
 ```bash
-npm install express axios https-proxy-agent
+npm install express axios https-proxy-agent cors
 ```
 
 Change your publickey in entries in server_noproxy.js or server_proxy.js file
